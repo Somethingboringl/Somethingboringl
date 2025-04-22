@@ -1,0 +1,169 @@
+# 🤖 SumoBot: Autonomous Obstacle-Attacking Robot
+
+A basic autonomous robot designed for sumo-style battles or obstacle interactions. Uses an **infrared Sharp distance sensor** and simple motor control to detect opponents and engage them.
+
+---
+
+## 🧠 Features
+
+- Detects nearby objects and charges at them
+- Spins to search if no opponent is detected
+- Uses a median filter to smooth sensor readings
+- Controlled by an Arduino UNO
+
+---
+
+## 🧰 Technologies & Hardware
+
+- Arduino UNO
+- Sharp GP2Y0A21YK0F distance sensor (analog IR)
+- 2x DC motors
+- L298N motor driver
+- Servo motor (for potential expansion)
+- Power source (battery pack)
+- Arduino IDE
+
+---
+
+## 🔌 Wiring Overview
+
+| Component       | Arduino Pin |
+|----------------|-------------|
+| Motor IN1       | 5           |
+| Motor IN2       | 4           |
+| Motor IN3       | 6           |
+| Motor IN4       | 7           |
+| ENA             | 10          |
+| ENB             | 11          |
+| Sharp Sensor    | A2          |
+| Servo Signal    | 9           |
+
+## 🚀 Getting Started
+
+1. Wire the components as described (you may change pins).
+2. Upload `robot_sumo.ino` to your Arduino.
+3. Power on your bot and watch it hunt!
+
+---
+
+## 📂 Project Structure
+/robot_sumo
+  README.md
+  robot_sumo.ino
+  LICENSE
+
+This project is licensed under the [Apache License 2.0](./LICENSE).
+
+
+
+## Code
+#include <Servo.h>
+
+Servo myservo;
+
+// motor pins
+int IN1 = 5;
+int IN2 = 4;
+int IN3 = 6; 
+int IN4 = 7;
+int ENA = 10;
+int ENB = 11;
+
+// sensor pins
+const int sensorSharp = A2; 
+
+// constants
+const int AttackDistance = 15;
+
+void forward() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
+}
+
+void back() {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, 255);
+  analogWrite(ENB, 255);
+}
+
+void stop() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+}
+
+void turnRight() {
+  digitalWrite(IN1, HIGH); 
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW); 
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENA, 150); 
+  analogWrite(ENB, 150);
+  delay(500); 
+  stop();
+}
+
+float readSensorSharp(int pinSensor) {
+  static float readings[3];
+  static int index = 0;
+
+  int AnalogValue = analogRead(pinSensor);
+  float Volt = AnalogValue * (5.0 / 1023.0);
+  float distance_cm = 27.86 * pow(Volt, -1.15);
+
+  readings[index] = distance_cm;
+  index = (index + 1) % 3;
+
+  float a = readings[0], b = readings[1], c = readings[2], temp;
+
+  if (a > b) { temp = a; a = b; b = temp; }
+  if (b > c) { temp = b; b = c; c = temp; }
+  if (a > c) { temp = a; a = c; c = temp; }
+
+  return b;
+}
+
+void setup() {
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT); 
+  pinMode(IN4, OUTPUT); 
+  pinMode(ENA, OUTPUT);
+  pinMode(ENB, OUTPUT); 
+
+  pinMode(sensorSharp, INPUT);
+  Serial.begin(9600);
+
+  myservo.attach(9, 600, 2300);
+  myservo.write(90); 
+}
+
+void loop() {
+  float OpDistance = readSensorSharp(sensorSharp); // opponent distance
+  
+  Serial.print("distance: ");
+  Serial.print(OpDistance);
+  Serial.println(" cm");
+
+  if (OpDistance <= AttackDistance && OpDistance > 0) {
+    forward(); 
+    delay(500); 
+    back();      
+    delay(300);
+    stop();
+  } else {
+    turnRight(); 
+  }
+
+  delay(100);
+}
+
+
