@@ -7,6 +7,10 @@
 - 😄 Pronouns: he/him
 - ⚡ Fun fact: I'm a huge cat lover
 
+- ## 📝 License
+This project is licensed under the Apache License 2.0. See the (LICENSE) file for more details.
+
+
 <!---
 Somethingboringl/Somethingboringl is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 You can click the Preview link to take a look at your changes.
