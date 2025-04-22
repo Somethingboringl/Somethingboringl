@@ -8,7 +8,8 @@
 - ⚡ Fun fact: I'm a huge cat lover
 
 - ## 📝 License
-This project is licensed under the Apache License 2.0. See the (LICENSE) file for more details.
+
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for more details.
 
 
 <!---
